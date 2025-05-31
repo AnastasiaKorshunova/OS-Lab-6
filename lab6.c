@@ -63,7 +63,7 @@ int count_previous_launches(const char *greeting) {
                 if (first) {
                     char *second = strchr(first + 1, '|');
                     if (second) {
-                        second += 1;  |
+                        second += 1;
                         while (*second == ' ') second++; 
 
                        
