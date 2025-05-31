@@ -56,23 +56,31 @@ int count_previous_launches(const char *greeting) {
         for (ssize_t i = 0; i < bytes_read; i++) {
             char c = buffer[i];
             if (c == '\n' || line_pos >= 255) {
-                line[line_pos] = '\0'; // конец строки
+                line[line_pos] = '\0';
 
-                // Найдём приветствие (второе поле после "|")
+        
                 char *first = strchr(line, '|');
                 if (first) {
                     char *second = strchr(first + 1, '|');
                     if (second) {
-                        second += 2; // пропустить "| "
-                        char *third = strchr(second, '|');
-                        if (third) *third = '\0'; // временно завершить приветствие
-                        if (strcmp(second, greeting) == 0) {
+                        second += 1;  |
+                        while (*second == ' ') second++; 
+
+                       
+                        char temp[128];
+                        int j = 0;
+                        while (*second && *second != '|' && j < 127) {
+                            temp[j++] = *second++;
+                        }
+                        temp[j] = '\0';
+
+                        if (strcmp(temp, greeting) == 0) {
                             count++;
                         }
                     }
                 }
 
-                line_pos = 0; // начать собирать новую строку
+                line_pos = 0;
             } else {
                 line[line_pos++] = c;
             }
@@ -82,6 +90,7 @@ int count_previous_launches(const char *greeting) {
     close(fd);
     return count;
 }
+
 
 
 void write_log_entry(const char *entry) {
