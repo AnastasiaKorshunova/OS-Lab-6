@@ -84,8 +84,8 @@ void write_log_entry(const char *entry) {
     close(fd);
 }
 
-int main() {
-   
+
+  int main() {
     signal(SIGINT, handle_sigint);
 
     pid_t pids[NUM_CHILDREN];
@@ -113,8 +113,9 @@ int main() {
                      my_pid, greeting, time_str, count);
 
             printf("%s", log_entry);
-            write_log_entry(log_entry);
+            fflush(stdout);  // 👈 вывод гарантирован
 
+            write_log_entry(log_entry);
             exit(EXIT_SUCCESS);
         } else {
             pids[i] = pid;
@@ -126,6 +127,9 @@ int main() {
     }
 
     printf("Parent process completed.\n");
+    fflush(stdout);
+
+    usleep(300000);  // 👈 даём терминалу всё вывести
 
     pid_t scrot_pid = fork();
 
