@@ -46,28 +46,43 @@ int count_previous_launches(const char *greeting) {
         return 0;
     }
 
-    char buf[BUFSIZE + 1];
-    ssize_t bytes_read;
+    char buffer[BUFSIZE + 1];
+    char line[256];
     int count = 0;
+    ssize_t bytes_read;
+    int line_pos = 0;
 
-    while ((bytes_read = read(fd, buf, BUFSIZE)) > 0) {
-        if (bytes_read < 0) {
-            perror("read failed");
-            close(fd);
-            return count;
-        }
+    while ((bytes_read = read(fd, buffer, BUFSIZE)) > 0) {
+        for (ssize_t i = 0; i < bytes_read; i++) {
+            char c = buffer[i];
+            if (c == '\n' || line_pos >= 255) {
+                line[line_pos] = '\0'; // конец строки
 
-        buf[bytes_read] = '\0';
-        char *p = buf;
-        while ((p = strstr(p, greeting)) != NULL) {
-            count++;
-            p += strlen(greeting);
+                // Найдём приветствие (второе поле после "|")
+                char *first = strchr(line, '|');
+                if (first) {
+                    char *second = strchr(first + 1, '|');
+                    if (second) {
+                        second += 2; // пропустить "| "
+                        char *third = strchr(second, '|');
+                        if (third) *third = '\0'; // временно завершить приветствие
+                        if (strcmp(second, greeting) == 0) {
+                            count++;
+                        }
+                    }
+                }
+
+                line_pos = 0; // начать собирать новую строку
+            } else {
+                line[line_pos++] = c;
+            }
         }
     }
 
     close(fd);
     return count;
 }
+
 
 void write_log_entry(const char *entry) {
     int fd = open(LOG_FILE, O_WRONLY | O_CREAT | O_APPEND, 0644);
@@ -113,7 +128,8 @@ void write_log_entry(const char *entry) {
                      my_pid, greeting, time_str, count);
 
             printf("%s", log_entry);
-            fflush(stdout);  // 👈 вывод гарантирован
+
+            fflush(stdout);  
 
             write_log_entry(log_entry);
             exit(EXIT_SUCCESS);
@@ -127,9 +143,10 @@ void write_log_entry(const char *entry) {
     }
 
     printf("Parent process completed.\n");
+
     fflush(stdout);
 
-    usleep(300000);  // 👈 даём терминалу всё вывести
+    usleep(300000);  
 
     pid_t scrot_pid = fork();
 
