@@ -6,7 +6,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <signal.h>
+#include <sys/file.h>
 
 #define NUM_CHILDREN 5
 #define LOG_FILE "log.txt"
@@ -16,7 +16,6 @@ void get_time(char *buffer, size_t size);
 int count_previous_launches_all(int counts[], const char *greetings[], int n);
 int check_greeting_line(const char *line, const char *greeting);
 void write_log(const char *greeting, int launch_number);
-void handle_sigint(int sig);
 
 const char *greetings[NUM_CHILDREN] = {
     "Hello from child 1",
@@ -85,33 +84,45 @@ int count_previous_launches_all(int counts[], const char *greetings[], int n) {
 }
 
 void write_log(const char *greeting, int launch_number) {
-    int fd = open(LOG_FILE, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    int fd = open(LOG_FILE, O_WRONLY | O_CREAT, 0644);
     if (fd < 0) {
         perror("open failed");
         return;
     }
+
+    if (flock(fd, LOCK_EX) < 0) {
+        perror("flock failed");
+        close(fd);
+        return;
+    }
+
+    if (lseek(fd, 0, SEEK_END) < 0) {
+        perror("lseek failed");
+        flock(fd, LOCK_UN);
+        close(fd);
+        return;
+    }
+
     char time_str[32];
     get_time(time_str, sizeof(time_str));
+
     char entry[256];
     snprintf(entry, sizeof(entry), "PID: %d | %s | %s | Launch #%d\n", getpid(), greeting, time_str, launch_number);
+
     if (write(fd, entry, strlen(entry)) < 0) {
         perror("write failed");
     }
+
+    flock(fd, LOCK_UN);
     close(fd);
 }
 
-void handle_sigint(int sig) {
-    (void)sig;
-    write(STDOUT_FILENO, "\nSIGINT received. Exiting.\n", 28);
-    _exit(0);
-}
-
 int main() {
-    signal(SIGINT, handle_sigint);
     int launch_counts[NUM_CHILDREN];
     count_previous_launches_all(launch_counts, greetings, NUM_CHILDREN);
     for (int i = 0; i < NUM_CHILDREN; i++) launch_counts[i]++;
     pid_t pids[NUM_CHILDREN];
+
     for (int i = 0; i < NUM_CHILDREN; i++) {
         pid_t pid = fork();
         if (pid < 0) {
@@ -135,14 +146,13 @@ int main() {
     for (int i = 0; i < NUM_CHILDREN; i++) {
         waitpid(pids[i], NULL, 0);
     }
-         
+
     printf("Parent process completed.\n");
     fflush(stdout);
     usleep(500000);
-   
+
     char screenshot_name[64];
     snprintf(screenshot_name, sizeof(screenshot_name), "screenshot_launch_%d.png", launch_counts[0]);
-    
 
     pid_t scrot_pid = fork();
     if (scrot_pid == 0) {
