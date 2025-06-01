@@ -140,16 +140,19 @@ int main() {
     fflush(stdout);
     usleep(500000);
    
+    char screenshot_name[64];
+    snprintf(screenshot_name, sizeof(screenshot_name), "screenshot_launch_%d.png", launch_counts[0]);
+    
 
     pid_t scrot_pid = fork();
     if (scrot_pid == 0) {
-        char *args[] = {"scrot", "screenshot_log.png", NULL};
+        char *args[] = {"scrot", screenshot_name, NULL};
         execvp("scrot", args);
         perror("scrot failed");
         exit(EXIT_FAILURE);
     } else if (scrot_pid > 0) {
         waitpid(scrot_pid, NULL, 0);
-        printf("Screenshot saved as screenshot_log.png\n");
+        printf("Screenshot saved as %s\n", screenshot_name);
     }
 
     return 0;
