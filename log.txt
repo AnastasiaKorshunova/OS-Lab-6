@@ -1,0 +1,15 @@
+PID: 24255 | Hello from child 1 | 2025-06-01T11:25:19+0300 | Launch #1
+PID: 24256 | Hey from child 2 | 2025-06-01T11:25:19+0300 | Launch #1
+PID: 24259 | Good evening from child 5 | 2025-06-01T11:25:19+0300 | Launch #1
+PID: 24258 | Labas from child 4 | 2025-06-01T11:25:19+0300 | Launch #1
+PID: 24257 | Hi from child 3 | 2025-06-01T11:25:19+0300 | Launch #1
+PID: 24265 | Hello from child 1 | 2025-06-01T11:25:33+0300 | Launch #2
+PID: 24266 | Hey from child 2 | 2025-06-01T11:25:33+0300 | Launch #2
+PID: 24268 | Labas from child 4 | 2025-06-01T11:25:33+0300 | Launch #2
+PID: 24267 | Hi from child 3 | 2025-06-01T11:25:33+0300 | Launch #2
+PID: 24269 | Good evening from child 5 | 2025-06-01T11:25:33+0300 | Launch #2
+PID: 24272 | Hello from child 1 | 2025-06-01T11:25:45+0300 | Launch #3
+PID: 24273 | Hey from child 2 | 2025-06-01T11:25:45+0300 | Launch #3
+PID: 24275 | Labas from child 4 | 2025-06-01T11:25:45+0300 | Launch #3
+PID: 24276 | Good evening from child 5 | 2025-06-01T11:25:45+0300 | Launch #3
+PID: 24274 | Hi from child 3 | 2025-06-01T11:25:45+0300 | Launch #3
