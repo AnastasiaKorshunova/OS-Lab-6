@@ -135,12 +135,11 @@ int main() {
     for (int i = 0; i < NUM_CHILDREN; i++) {
         waitpid(pids[i], NULL, 0);
     }
-
-    fflush(stdout); // Убедиться, что все сообщения выведены
-    sleep(1);       // Дать экрану время обновиться
-
+         
     printf("Parent process completed.\n");
     fflush(stdout);
+    usleep(500000);
+   
 
     pid_t scrot_pid = fork();
     if (scrot_pid == 0) {
